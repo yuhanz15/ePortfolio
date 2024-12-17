@@ -71,8 +71,7 @@
   /* Main page */
   .format {
     margin: 70px auto 0;
-    min-width: 60%;
-    max-width: 80%;
+    max-width: 75%;
     display: flex;
     height: 100vh;
     background-color: beige;
@@ -90,7 +89,6 @@
   
   .intro {
     padding: 20px;
-    font-size: 12px;
   }
   
   /* Project page */
@@ -98,8 +96,7 @@
     display: flex;
     margin-left: auto;
     margin-right: auto;
-    min-width: 60%;
-    max-width: 80%;
+    max-width: 75%;
     height: 100vh;
     background-color: beige;
     justify-content: center;
