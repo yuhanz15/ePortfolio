@@ -10,16 +10,27 @@
     <div class="header">
       <nav class="navbar">
         <ul>
-          <il><a href="index.html">About</a></il>
-          <il><a href="project.html">Project</a></il>
+          <li><a href="index.html">About</a></li>
+          <li>
+            <a href="project.html">Project</a>
+            <ul class="dropdown">
+              <li><a id="p1" href="p1.html">Vaccine Reservation System</a></li>
+              <li><a id="p2" href="p2.html">Modeling Tennis Momentum Shifts</a></li>
+              <li><a id="p3" href="p3.html">Predicting Number of Influenza Cases</a></li>
+              <li><a id="p4" href="p4.html">Medical Cost Modeling</a></li>
+              <li><a id="p5" href="p5.html">Music Emotion Classification</a></li>
+              <!-- <li><a id="p6" href="p6.html">F</a></li> -->
+            </ul>
+          </li>
         </ul>
       </nav>
     </div>
+
     <div class="format1">
       <div class="block1"> 
         <div class="projects">
-          <div class="p1">
-            <a href="https://github.com/yuhanz15/Vaccine-Reservation-System-HW6CSE414"><h2>Vaccine Reservation System</h2></a>
+          <div>
+            <a href="p1.html"><h2>Vaccine Reservation System</h2></a>
             <p>
               This project is a vaccine scheduler built in Java that interatcs with a database
               with SQL, to store and manage vaccine reservations. Users can create their account, 
@@ -30,30 +41,8 @@
             </p>
           </div>
   
-          <div class="p2">
-            <a href="https://github.com/yuhanz15/Custom-Memory-Management-in-C-HW6CSE374"><h2>Custom Memory Management in C</h2></a>
-            <p>
-              This project implements a memory management system in C, focusing on efficient 
-              memory allocation, deallocation, and management. The system provides an alternative 
-              to standard memory management functions like malloc and free, offering users greater 
-              control over memory usage. It includes key features such as a custom allocator to handle 
-              memory blocks, mechanisms to detect and manage those blocks, adn methods to optimize memory 
-              utilization. 
-            </p>
-            <p>
-              The program interacts directly with the system memory using low-level operations, 
-              allowing users to allocate and release memory dynamically. It also includes error 
-              handling to prevent issues such as memory leaks and invalid access, ensuring 
-              stability and reliability. Designed to demonstrate a deeper understanding of 
-              memory management concepts, this project showcases how custom allocators can 
-              improve performance and address specific application requirements.
-            </p>
-          </div>
-  
-          <div class="p3">
-            <a href="https://github.com/yuhanz15/ePortfolio/blob/main/Projects/Modeling%20Tennis%20Momentum%20Shifts.pdf"><h2>
-              Modeling Tennis Momentum Shifts
-            </h2></a>
+          <div>
+            <a href="p2.html"><h2>Modeling Tennis Momentum Shifts</h2></a>
             <p>
               This project was done with one of my classmates as part of the MCM competition. 
               We aimed to explore and model how "momentum" shifts during a tennis match, which is a 
@@ -78,8 +67,8 @@
             </p>
           </div>
   
-          <div class="p4">
-            <a href="https://github.com/yuhanz15/ePortfolio/blob/main/Projects/Comparative%20Analysis.pdf"><h2>
+          <div>
+            <a href="p3.html"><h2>
               Comparative Analysis of SARIMA and ETS Models in Forecasting Influenza Cases in China
             </h2></a>
             <p>
@@ -100,6 +89,65 @@
               like climate and vaccination rates to see how they impact predictions.
             </p>
           </div>
+
+          <div>
+            <a href="p4.html"><h2>Modeling Medical Charges Using Linear Regression and Group Splitting</h2></a>
+            <p>
+              In this project, I focused on building a predictive model for individual medical charges based 
+              on factors like age, BMI, smoking status, and number of children. After initial model 
+              fitting, I noticed that several variables were not significant predictors, so I performed variable 
+              selection to simplify the model and improve interpretability.
+              Through analyzing the residuals and scatter plots, I identified that the data naturally 
+              split into groups, especially between smokers and non-smokers, and further among smokers 
+              based on BMI levels. After cross-validation, I determined the optimal grouping and created a new 
+              linear model based on these splits. This approach significantly improved model performance, with 
+              an adjusted R-squared of over 0.86.
+            </p>
+            <p>
+              Although I attempted a Box-Cox transformation to further refine the model, it did not 
+              substantially improve residual normality. Therefore, the final model remained on the original 
+              scale. This project deepened my understanding of model selection, group-based modeling 
+              strategies, and the balance between model complexity and interpretability.
+            </p>
+          </div>
+
+          <div>
+            <a href="p5.html"><h2>Emotion Classification in Music Using Machine Learning</h2></a>
+            <p>
+              This project explores how machine learning models can classify music based on emotions using the 
+              Thayer-Russell plane. I built a dataset by enhancing the DEAM MediaEval dataset with additional 
+              audio features extracted using the Marsyas software. Each song was labeled according to arousal and valence values, 
+              leading to a fine-grained emotion categorization.
+            </p>
+            <p>
+              There are two approaches in this project were compared: a LASSO regression model that predicts arousal 
+              and valence separately, and a multinomial logistic regression model that directly classifies emotions. 
+              While the LASSO model achieved low prediction errors for arousal and valence, the multinomial logistic model 
+              demonstrated better overall accuracy in direct emotion classification. This project highlights the challenges and 
+              potential strategies in modeling emotional responses to music.
+            </p>
+          </div>
+
+          <!-- <div>
+            <a href="p6"><h2>Custom Memory Management in C</h2></a>
+            <p>
+              This project implements a memory management system in C, focusing on efficient 
+              memory allocation, deallocation, and management. The system provides an alternative 
+              to standard memory management functions like malloc and free, offering users greater 
+              control over memory usage. It includes key features such as a custom allocator to handle 
+              memory blocks, mechanisms to detect and manage those blocks, adn methods to optimize memory 
+              utilization. 
+            </p>
+            <p>
+              The program interacts directly with the system memory using low-level operations, 
+              allowing users to allocate and release memory dynamically. It also includes error 
+              handling to prevent issues such as memory leaks and invalid access, ensuring 
+              stability and reliability. Designed to demonstrate a deeper understanding of 
+              memory management concepts, this project showcases how custom allocators can 
+              improve performance and address specific application requirements.
+            </p>
+          </div> -->
+
         </div>
       </div>
     </div>
