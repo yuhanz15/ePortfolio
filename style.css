@@ -91,6 +91,7 @@
     font-weight: normal;
   }
 
+
   /* Paragraph setting */
   p {
     line-height: 1.5rem;
@@ -101,9 +102,6 @@
   h1 {
     margin: 0 0 10px;
   }
-
-
-
 
   /* Main page */
   .format {
@@ -149,6 +147,11 @@
 
   .projects div {
     margin-top: 50px;
+  }
+
+  .projects a {
+    border-bottom: 2px solid #000;
+    display: inline-block;
   }
 
   .projects h2 {

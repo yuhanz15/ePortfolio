@@ -26,36 +26,34 @@
       </nav>
     </div>
 
-    <div class="format1">
-        <div class="block1">
+    <div class="format">
+        <div class="block">
             <div class="projects">
                 <h2>Emotion Classification in Music Using Machine Learning</h2>
 
                 <p>
                     This project is part of the Departmental Honors requirement for the 
-                    statistics program at the University of Washington, and alse the project
-                    that is used to recieve the STAT 499 credits. 
+                    statistics program at the University of Washington, and also the project 
+                    that is used to receive the STAT 499 credits.
                 </p>
                 <p>
                     This project explores how machine learning models can classify emotions 
                     in music using the Russell Circumplex Emotion model. I used the DEAM 
                     MediaEval dataset from Kaggle, with Marsyas as a tool to extract the 
-                    feature of music with several different algorithms, which let me 
-                    forms the dataset
+                    features of music with several different algorithms, which let me 
+                    form the dataset 
                     used in this project. Each song was labeled according to its arousal 
                     and valence levels to classify emotion.
                 </p>
-
                 <p>
                     I compared two modeling approaches: a LASSO regression model that 
-                    separately predicts arousal and valence, then label emotions using the
-                    same stanrdard as before, and a multinomial logistic 
+                    separately predicts arousal and valence, then labels emotions using the 
+                    same standard as before, and a multinomial logistic 
                     regression model that directly predicts the emotion category. While 
                     LASSO achieved low mean squared error on arousal and valence, it was 
                     less accurate for emotion classification compared to the multinomial 
                     model.
                 </p>
-
                 <p>
                     One challenge I encountered was that although arousal and valence 
                     predictions were relatively accurate, small errors could still lead 
@@ -63,9 +61,11 @@
                     the Russell model. This highlighted the difficulty of translating 
                     continuous emotion metrics into discrete categories.
                 </p>
-
                 <p>
-                    The final report is still in progress.
+                    The final report is still in progress. The dataset used in this project 
+                    was developed from another dataset on Kaggle (<a href="https://www.kaggle.com/datasets/imsparsh/deam-mediaeval-dataset-emotional-analysis-in-music" target="_blank">link</a>), 
+                    and the full dataset with augmented features and target emotions 
+                    can be found <a href="Projetcs/MEC.csv" target="_blank">here</a>.
                 </p>
             </div>
         </div>
