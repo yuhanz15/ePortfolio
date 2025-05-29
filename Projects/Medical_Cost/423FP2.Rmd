@@ -1,0 +1,316 @@
+---
+title: "STAT423 Final Project"
+author: "Yuning Hu, Luna Lu, Yuhan Zhang"
+graphics: true
+output: pdf_document
+urlcolor: blue
+header-includes:
+- \usepackage{amsmath,amsfonts,amssymb}
+- \usepackage{multicol,graphicx,hyperref,xcolor}
+- \usepackage{setspace} \doublespacing
+---
+
+## Part 0: Data Explore
+
+```{r, include=FALSE}
+library(MASS)
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+library(corrplot)
+library(car)
+library(glmnet)
+library(Matrix)
+na.omit(data)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, out.width = "50%")
+```
+
+```{r, include = FALSE}
+data<-read.csv("insurance.csv")
+data = na.omit(data)
+```
+
+The dataset used in this study is the Medical Cost Personal Datasets [1]. This dataset contains 6 predictors, 1 response variable, and 1338 observations. This dataset contains the individual medical costs billed by health insurance, and 6 other descriptive variables about the individual.
+
+Response variable:
+
+  + charges (numerical): Individual medical costs billed by health insurance.
+
+Input variables:
+
+  + age (numerical): Age of primary beneficiary.
+
+  + sex (categorical): Insurance contractor gender (female, male).
+
+  + bmi (numerical): Body mass index, providing an understanding of body, weights that are relatively high or low relative to height, objective index of body weight kgm2 using the ratio of height to weight, ideally 18.5 to 24.9.
+
+  + children (TBD): Number of children or dependents covered by health insurance.
+
+  + smoker (categorical): Smoking behavior.
+
+  + region (categorical): The beneficiary's residential area in the US (northeast, southeast, southwest, northwest).
+
+```{r}
+p1<-ggplot(data, aes(x = age)) + 
+  geom_histogram(binwidth = 5, fill = "blue", color = "black", alpha = 0.7) + 
+  stat_bin(binwidth = 5, geom = "text", aes(label = ..count..), vjust = 0.5, color = "black") + 
+  labs(title = "Histogram of age", x = "age", y = "Frequency") + 
+  theme_minimal()
+```
+
+```{r}
+p2<-ggplot(data, aes(x = sex)) + 
+  geom_bar(fill = "blue", color = "black", alpha = 0.7) + 
+  labs(title = "Bar Plot of sex", x = "sex", y = "Count") + 
+  geom_text(stat = "count", aes(label = ..count..), vjust = 1.5, color = "black", size = 5) +
+  theme_minimal()
+```
+
+```{r}
+p3<-ggplot(data, aes(x = bmi)) + 
+  geom_histogram(binwidth = 5, fill = "blue", color = "black", alpha = 0.7) + 
+  stat_bin(binwidth = 5, geom = "text", aes(label = ..count..), vjust = 0.7, color = "black") + 
+  labs(title = "Histogram of bmi", x = "bmi", y = "Frequency") + 
+  theme_minimal()
+```
+```{r}
+p4<-ggplot(data, aes(x = children)) + 
+  geom_histogram(binwidth = 1, fill = "blue", color = "black", alpha = 0.7) + 
+  stat_bin(binwidth = 1, geom = "text", aes(label = ..count..), vjust = 0.5, color = "black") + 
+  labs(title = "Histogram of children", x = "children", y = "Frequency") + 
+  theme_minimal()
+```
+
+
+```{r}
+p5<-ggplot(data, aes(x = smoker)) + 
+  geom_bar(fill = "blue", color = "black", alpha = 0.7) + 
+  labs(title = "Bar Plot of smoker", x = "smoker", y = "Count") + 
+  geom_text(stat = "count", aes(label = ..count..), vjust = 1.5, color = "black", size = 5) +
+  theme_minimal()
+```
+
+```{r}
+p6<-ggplot(data, aes(x = region)) + 
+  geom_bar(fill = "blue", color = "black", alpha = 0.7) + 
+  labs(title = "Bar Plot of region", x = "region", y = "Count") + 
+  geom_text(stat = "count", aes(label = ..count..), vjust = 1.5, color = "black", size = 5) +
+  theme_minimal()
+```
+```{r}
+p7<-ggplot(data, aes(x = charges)) + 
+  geom_histogram(binwidth = 5000, fill = "blue", color = "black", alpha = 0.7) + 
+  stat_bin(binwidth = 5000, geom = "text", aes(label = ..count..), vjust = 0.7, color = "black") + 
+  labs(title = "Histogram of charges", x = "charges", y = "Frequency") + 
+  theme_minimal()
+```
+
+```{r,fig.width=10,fig.height=10, fig.align = "center"}
+combined_plot <- (p1 | p2 | p3) /
+                 (p4 | p5 | p6) /
+                 p7
+
+
+print(combined_plot)
+```
+
+We first check if there are any NA values in the data and the result is false. Then we visualize each factor so that we can have a brief understanding of the data. We can see from the plot that the sex and region of in this data is evenly distributed. There are more data of patient under age 20 than other age intervals. For BMI, the data is approximately normally distributed with mean 30. For number of children, the more the children, the less the data. Also, in the data, the ratio of smokers and non-smokers is approximately 4:1. For our target, the plot of charges is skewed to the right, with most data scattered below 20000.
+
+```{r, fig.align = "center"}
+# age vs charges, have two other factors influencing the charges
+plot(data$age, data$charges, main="Age vs. Charges", xlab="Age", ylab="Charges")
+```
+
+Then we tried to plot a graph with Charges vs. Age. As we can see from the plot, it is significant that the points are divided into three groups. We will explore this division in later parts.
+
+
+## Part 1. Are there any correlated factors?
+
+For the purpose of improving model performance, we would need to pay attention to the variables who are correlated, as it may result in unstable coefficients and hardship in interpretation.
+
+To visualize their correlation, we can first check the scatter plot. However, categorical variables like “sex”, “smoker”, and “region” would not appear properly. From the scatterplot we can see that among the numerical variables, bmi has a weak positive correlation with charges and age has a weak to moderate positive correlation with charges. The correlation of other numerical variable pairs is not obvious just by eye-balling.
+
+```{r, out.width = "50%", fig.align="center"}
+numeric_data = data[, sapply(data, is.numeric)]
+pairs(numeric_data)
+M = cor(numeric_data)
+corrplot(M, method="color", addCoef.col = "black", tl.col="black")
+```
+
+
+To get more detailed information on the correlation, we can check the correlation matrix.
+
+
+From the correlation matrix we can see that it aligns with our observations from the scatterplot. Also we can see that all numerical variables' correlation to charges are positive. Since the largest correlation coefficient is 0.30, we would like to take a further step to decide whether to perform further data transformation. We would use the Variance Inflation Factor (VIF), which measures how much the variance of an estimated regression coefficient rises when the predictors are associated.
+
+```{r}
+vif(lm(charges ~ age + sex + bmi + children + smoker + region, data = data))
+```
+
+Since both general VIF and adjusted VIF for all variables are only slightly greater than 1, we can conclude that there is no problematic multicollinearity, and thus we would not perform further data transformation such as Principal Component Analysis (PCA).
+
+
+## Part 2. Do patients of one sex consistently pay more in medical costs compared to the other sex?
+
+```{r}
+summary(lm(charges ~ age + sex + bmi + children + smoker + region, data = data))$coefficients
+```
+
+We fit a linear model on all variables, and we can see that sex is not a significant factor that influences medical cost. However, based on Green and Pope's study [2], there is a difference between the medical cost based on different sex, where female costs more on the reproductive related diseases. We fit a linear model only consisting the sex term, and the summary output is:
+
+```{r}
+lm_sex <- lm(charges ~ I(sex), data)
+summary(lm_sex)$coefficients
+```
+
+Since we previously identified smoking as a significant factor, we are concerned that the effect of sex on charges may be influenced by smoking patterns. If the proportion of smokers differs between sexes, the observed effect of sex might be due to its correlation with smoking. To test this, we formulate the following hypotheses:
+$$H_0: \text{Proportion of smoker is the same between sex}, \ \ H_1:\text{Proportion of smoker is not the same between sex}$$
+Then we conduct a t test to test the hypothesis:
+
+```{r}
+female.data <- filter(data, sex=="female")
+male.data <- filter(data, sex=="male")
+
+female.smoker <- as.numeric(female.data$smoker == "yes")
+male.smoker <- as.numeric(male.data$smoker == "yes")
+#table(data$sex, data$smoker)
+t.test(female.smoker, male.smoker)
+```
+
+From the t test, we can see that the P-value is 0.005248, which is significant at level $\alpha=0.05$, which indicates that there is a difference in the proportion of smoking between sexes. Given that smoking is a significant predictor, the previously observed effect of sex in our regression models may be confounded by its correlation with smoking. 
+
+To see how these two terms are interacted, we fit another linear model including both the sexes and smoker with the interaction between these two terms:
+
+```{r}
+lm_sex_smoke <- lm(charges ~ I(sex)*I(smoker), data)
+summary(lm_sex_smoke)$coefficients
+```
+
+From the output, after including smoking and its interaction with sex, the coefficient for sex alone is no longer significant. However, the interaction term is statistically significant at level $\alpha=0.05$, indicating that male smokers, on average, pay an additional $3,038.10 in medical costs compared to the baseline group. 
+
+We also apply LASSO regression that penalizes less important predictors by shrinking their coefficients toward zero.
+
+```{r, warning=FALSE}
+set.seed(123)
+x = model.matrix(charges ~ age + sex + bmi + children + smoker + region, data = data)[, -1]
+y = data$charges
+lasso_model = cv.glmnet(x, y, alpha = 1)
+coef(lasso_model, s = "lambda.min")
+```
+
+We can see that the coefficient for sex is shrunk to zero, indicating that sex alone does not significantly contribute to predicting medical costs after accounting for other factors. Thus, with these models, we conclude that there is a difference of charges in different sex-smoker groups instead of sex groups.
+
+
+
+
+
+
+## Part 3
+
+We can see from the full model in part 2 that there are several terms in the summary with a large P-value, which means that we need to do a parameter selection. We select the term `age`, `smoker`, `bmi` and `children` based on the P-value with significant level $\alpha=0.05$, and fit a new linear model.
+
+```{r, fig.align="center"}
+lm3 <- lm(charges ~ age+smoker+bmi+children, data)
+summary(lm3)$coefficients
+plot(lm3$fitted.values, lm3$residuals, main="Residuals vs. fitted", xlab="fitted", ylab="residuals")
+```
+
+We can see from the residuals vs. fitted plot that even though the model summary shows a great fit, there is a split in the residuals, which means that there must be a split in the two groups we have (smoker vs. non-smoker). Also, from the scatter plots of charges vs. BMI and charges vs. age, it is clear that the data is divided into 3 different groups, and it is possible that the charges is different with three different groups. 
+
+```{r, fig.align="center"}
+par(mfrow=c(1,2))
+plot(data$bmi, data$charges)
+plot(data$age, data$charges)
+```
+
+Based on the bmi vs. charges plot, we can see that the charges is splitted when BMI equals 30 or larger. From the previous model summary, we know that the group of smokers and non-smokers makes a significant difference in medical cost charges, which means that we can try to split the data into different groups based on BMI. After testing different threshold, we choose to split the data into three different groups: 1. smoker whose BMI is larger than 30; 2. smoker whose BMI is smaller or equal to 30; 3. non-smokers. Then we fit another linear model. 
+
+```{r, fig.align="center"}
+data$sb <- ifelse(data$smoker == "yes" & data$bmi >= 30, "_smoke_large", ifelse(data$smoker == "yes" & data$bmi < 30, "_smoke_small", "_nosmoke"))
+lm_interaction <- lm(charges ~ age + children + sb, data = data)
+summary(lm_interaction)
+par(mfrow = c(1,2))
+temp <- data
+temp$residuals <- residuals(lm_interaction)
+temp$fitted <- fitted(lm_interaction)
+ggplot(temp, aes(x=fitted, y=residuals, color=sb))+
+  geom_point()+
+  geom_hline(yintercept=0, linetype="dashed") +
+  labs(title="Residuals vs. Fitted", x="Fitted", y="Residuals")
+qqnorm(lm_interaction$residuals)
+qqline(lm_interaction$residuals)
+```
+
+It is clearly that the model is underestimated in all the groups. Since the assumptions of residuals are not holding very well, we do a Box-Cox test to transform the response variable and re-fit a linear model.
+
+```{r, fig.align="center",  out.width="45%"}
+b <- boxcox(lm_interaction)
+lambda_opt <- b$x[which.max(b$y)]
+lm_re <- lm((charges^lambda_opt-1)/lambda_opt ~ age + children + sb, data = data)
+
+par(mfrow = c(1, 2))
+plot(lm_re$fitted.values, lm_re$residuals)
+qqnorm(lm_re$residuals)
+qqline(lm_re$residuals)
+```
+
+From the Box-Cox test, the optimal $\lambda$ is `r round(lambda_opt, 4)`, and we transform the response value in the way $Y_{transform}=\frac{Y^\lambda-1}{\lambda}$. From the TA plot and the qqplot of the re-fitted model, the transformation does not do a really good job, and the response variable is still right-skewed. So the model of best fit we chose is:
+
+$$Y=\beta_0 + \beta_1age + \beta_2I(smoker) + \beta_3I(bmilarge) + \beta_4children+\beta_5I(smoker) * I(bmilarge)$$
+
+\pagebreak
+
+## References
+
+1. Miri Choi. Medical Cost Personal Datasets. Kaggle. Available at: [https://www.kaggle.com/datasets/mirichoi0218/insurance](https://www.kaggle.com/datasets/mirichoi0218/insurance). Accessed March 5, 2025.
+
+2. Green CA, Pope CR. Sex Differences in the Use of Health Care Services. *New England Journal of Medicine.* 1998;338(23):1678-1683. doi:[10.1056/NEJM199806043382307](https://www.nejm.org/doi/full/10.1056/NEJM199806043382307).
+
+## Appendix
+### Code
+```{r echo = T, results = 'hide'}
+# Select the BMI threshold which results in smallest MSE
+set.seed(123)
+train_index <- sample(1:length(data$charges), 0.8*length(data$charges))
+train <- data[train_index,]
+test <- data[-train_index,]
+bmi_range <- c(30, 30.5, 31, 31.5, 32, 32.5, 33, 33.5, 34, 34.5, 35)
+names(bmi_range) <- c(30, 30.5, 31, 31.5, 32, 32.5, 33, 33.5, 34, 34.5, 35)
+test_mse <- numeric()
+for (i in 1:length(bmi_range)){
+  train$bmilarge <- as.factor(ifelse(train$bmi > bmi_range[i], 1, 0))
+  test$bmilarge <- as.factor(ifelse(test$bmi > bmi_range[i], 1, 0))
+  lm.1 <- lm(charges ~ age+I(smoker)+I(smoker):I(bmilarge)+children, train)
+  pred <- predict(lm.1, newdata=test)
+  test_mse[i] <- sum((test$charges - pred)^2)/nrow(test)
+}
+names(bmi_range)[which.min(test_mse)]
+# "30"
+```
+
+### Attribution
+
+Part 0: All, Part 1: Yuning Hu, Part 2: Luna Lu, Part 3: Yuhan Zhang
+
+
+
+
+```{r}
+library(xtable)
+library(tidyverse) 
+library(modelsummary)
+library(broom)
+library(kableExtra)
+
+
+ df = tibble(x = c(1.52, 1.6, 1.68, 1.75, 1.83),
+             y = 1.69, 1.74, 1.80, 1.93, 2.0 )
+
+fit <- lm(y ~ x , data = df)
+
+tidy(fit)
+
+
+modelsummary(fit,
+             output = "kableExtra")
+```
